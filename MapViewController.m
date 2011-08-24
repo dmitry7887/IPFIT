@@ -106,8 +106,8 @@ enum
     //placemarkViewController.placemark = placemark;
    
     placeDescription=[placemark title];
-    annot.title=placeDescription; 
-    tempEvent.title=placeDescription;
+    annot.subtitle=placeDescription; 
+    tempEvent.location=placeDescription;
     EKEventEditViewController *addController = [[EKEventEditViewController alloc] initWithNibName:nil bundle:nil];
     
     
@@ -123,6 +123,8 @@ enum
     [addController release];
     NSError *err;
     [eventStore saveEvent:tempEvent span:EKSpanThisEvent error:&err];
+    [tempEvent release];
+    [annot release];
     
     //[self presentModalViewController:placemarkViewController animated:YES];
 }
@@ -162,7 +164,7 @@ enum
     [self.mapView convertPoint:touchPoint toCoordinateFromView:self.mapView];
     
     
-    annot = [[MKPointAnnotation alloc] init];
+    annot = [[[MKPointAnnotation alloc] init] retain];
     annot.coordinate = touchMapCoordinate;
     annot.title=@"Do";
     [pinList addObject:annot];
@@ -171,13 +173,12 @@ enum
     [self.mapView addAnnotation:annot];
     [annot autorelease];    
      
-    tempEvent  = [EKEvent eventWithEventStore:eventStore];
+    tempEvent  = [[EKEvent eventWithEventStore:eventStore] retain];
     tempEvent.notes=[[NSString stringWithFormat:@"lat=%f",touchMapCoordinate.latitude] stringByAppendingString:[NSString stringWithFormat:@" lon=%f",touchMapCoordinate.longitude]];
      
-    tempEvent.startDate = [[NSDate alloc] init];
-    tempEvent.endDate   = [[NSDate alloc] initWithTimeInterval:600 sinceDate:tempEvent.startDate];
-    
-
+    tempEvent.startDate = [NSDate date];
+    tempEvent.endDate   = [NSDate dateWithTimeInterval:600 sinceDate:tempEvent.startDate];
+    [eventsList addObject:tempEvent];
 }
 
 - (void)viewDidLoad
@@ -190,37 +191,23 @@ enum
 	self.navigationItem.backBarButtonItem = temporaryBarButtonItem;
 	[temporaryBarButtonItem release];
     
-    // create out annotations array (in this example only 2)
-    self.mapAnnotations = [[NSMutableArray alloc] initWithCapacity:2];
-    
-    // annotation for the City of San Francisco
-    SFAnnotation *sfAnnotation = [[SFAnnotation alloc] init];
-    [self.mapAnnotations insertObject:sfAnnotation atIndex:kCityAnnotationIndex];
-    [sfAnnotation release];
-    
-    // annotation for Golden Gate Bridge
-    BridgeAnnotation *bridgeAnnotation = [[BridgeAnnotation alloc] init];
-    [self.mapAnnotations insertObject:bridgeAnnotation atIndex:kBridgeAnnotationIndex];
-    [bridgeAnnotation release];
-
-    // annotation for My Gate Bridge
-    EventMKAnnotation *myAnnotation = [[EventMKAnnotation alloc] init];
-    [self.mapAnnotations insertObject:myAnnotation atIndex:kMyAnnotationIndex];
-    [myAnnotation release];
     
     [self gotoLocation];    // finally goto San Francisco
     UILongPressGestureRecognizer *lpgr = [[UILongPressGestureRecognizer alloc] 
                                           initWithTarget:self action:@selector(handleLongPress:)];
-    lpgr.minimumPressDuration = 2.0; //user needs to press for 2 seconds
+    lpgr.minimumPressDuration = 1.0; //user needs to press for 1 seconds
     [self.mapView addGestureRecognizer:lpgr];
     [lpgr release];
     mapView.showsUserLocation = YES;
     self.pinList=[[NSMutableArray alloc] initWithCapacity:10];
-  
-    // Initialize an event store object with the init method. Initilize the array for events.
-	self.eventStore = [[EKEventStore alloc] init];
     
-	self.eventsList = [[NSMutableArray alloc] initWithArray:0];
+  
+    
+    
+    // Initialize an event store object with the init method. Initilize the array for events.
+	self.eventStore = [[[EKEventStore alloc] init] autorelease];
+    
+	self.eventsList = [[[NSMutableArray alloc] initWithArray:0] autorelease];
 
 	// Get the default calendar from store.
 	self.defaultCalendar = [self.eventStore defaultCalendarForNewEvents];
@@ -229,10 +216,10 @@ enum
 	[self.eventsList addObjectsFromArray:[self fetchEventsForToday]];
     
         
-    EKEvent *event  = [EKEvent eventWithEventStore:eventStore];
+    EKEvent *event  = [[EKEvent eventWithEventStore:eventStore] retain];
     CLLocationCoordinate2D location; 
     for (event in eventsList){
-        NSString *notes=[[NSString alloc] initWithString:event.notes];
+        NSString *notes=event.notes;
         if (notes){
  
             NSRange textRangeLat;
@@ -250,7 +237,7 @@ enum
                 
                 NSString *lon=[notes substringWithRange:textRangeLon];
                 NSString *lat=[notes substringWithRange:textRangeLat];
-                annot = [[MKPointAnnotation alloc] init];
+                annot = [[[MKPointAnnotation alloc] init] retain];
                 location.latitude=[lat doubleValue];
                 location.longitude=[lon doubleValue];
                 
@@ -262,10 +249,8 @@ enum
                 [self.mapView addAnnotation:annot];
                 
                 [self.pinList addObject:annot];
-                [annot release];
                 //Does contain the substring
             }
-          
         }
     }
     
@@ -295,29 +280,28 @@ enum
 #pragma mark -
 #pragma mark ButtonActions
 
-- (IBAction)cityAction:(id)sender
+- (IBAction)walkAction:(id)sender
 {
-    [self gotoLocation];//•• avoid this by checking its region from ours??
-    
-    [self.mapView removeAnnotations:self.mapView.annotations];  // remove any annotations that exist
-    
-    [self.mapView addAnnotation:[self.mapAnnotations objectAtIndex:kCityAnnotationIndex]];
+//    [self gotoLocation];//•• avoid this by checking its region from ours??
+//    
+//    [self.mapView removeAnnotations:self.mapView.annotations];  // remove any annotations that exist
+//    
+//    [self.mapView addAnnotation:[self.mapAnnotations objectAtIndex:kCityAnnotationIndex]];
 }
 
-- (IBAction)bridgeAction:(id)sender
+- (IBAction)carAction:(id)sender
 {
-    [self gotoLocation];
-    [self.mapView removeAnnotations:self.mapView.annotations];  // remove any annotations that exist
-    
-    [self.mapView addAnnotation:[self.mapAnnotations objectAtIndex:kBridgeAnnotationIndex]];
+//    [self gotoLocation];
+//    [self.mapView removeAnnotations:self.mapView.annotations];  // remove any annotations that exist
+//    
+//    [self.mapView addAnnotation:[self.mapAnnotations objectAtIndex:kBridgeAnnotationIndex]];
 }
 
-- (IBAction)allAction:(id)sender
+- (IBAction)detailsAction:(id)sender
 {
-    [self gotoLocation];
-    [self.mapView removeAnnotations:self.mapView.annotations];  // remove any annotations that exist
-    
-    [self.mapView addAnnotations:self.mapAnnotations];
+   
+    [self.navigationController pushViewController:self.detailViewController animated:YES];   
+
 }
 
 #pragma mark -
@@ -325,11 +309,26 @@ enum
 
 - (void)showDetails:(id)sender
 {
+	UIButton* button = sender;
+    
+	NSInteger index = button.tag;
     // the detail view does not want a toolbar so hide it
     [self.navigationController setToolbarHidden:YES animated:NO];
     
-    [self.navigationController pushViewController:self.detailViewController animated:YES];
+    // Upon selecting an event, create an EKEventViewController to display the event.
+	self.eventViewController = [[EKEventViewController alloc] initWithNibName:nil bundle:nil];			
+	if ([self.eventsList count]>index){
+        eventViewController.event = [self.eventsList objectAtIndex:index];
+        
+        // Allow event editing.
+        eventViewController.allowsEditing = YES;
+        
+        //	Push detailViewController onto the navigation controller stack
+        //	If the underlying event gets deleted, detailViewController will remove itself from
+        //	the stack and clear its event property.
+        [self.navigationController pushViewController:eventViewController animated:YES];   
     
+    }
 }
 
 - (MKAnnotationView *)mapView:(MKMapView *)theMapView viewForAnnotation:(id <MKAnnotation>)annotation
@@ -341,14 +340,15 @@ enum
     // if it's the user location, just return nil.
     if ([annotation isKindOfClass:[MKPointAnnotation class]]){
         // try to dequeue an existing pin view first
-        static NSString* BridgeAnnotationIdentifier = @"EventMKAnnotationIdentifier";
+        static NSString* PinAnnotationIdentifier = @"MKPinAnnotationIdentifier";
         MKPinAnnotationView* pinView = (MKPinAnnotationView *)
-        [mapView dequeueReusableAnnotationViewWithIdentifier:BridgeAnnotationIdentifier];
+        [mapView dequeueReusableAnnotationViewWithIdentifier:PinAnnotationIdentifier];
+        annot=annotation;
         if (!pinView)
         {
             // if an existing pin view was not available, create one
             MKPinAnnotationView* customPinView = [[[MKPinAnnotationView alloc]
-                                                   initWithAnnotation:annotation reuseIdentifier:BridgeAnnotationIdentifier] autorelease];
+                                                   initWithAnnotation:annotation reuseIdentifier:PinAnnotationIdentifier] autorelease];
             customPinView.pinColor = MKPinAnnotationColorPurple;
             customPinView.animatesDrop = YES;
             customPinView.canShowCallout = YES;
@@ -358,7 +358,8 @@ enum
             // note: you can assign a specific call out accessory view, or as MKMapViewDelegate you can implement:
             //  - (void)mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view calloutAccessoryControlTapped:(UIControl *)control;
             //
-            UIButton* rightButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+            UIButton* rightButton = [[UIButton buttonWithType:UIButtonTypeDetailDisclosure] retain];
+			[rightButton setTag:[pinList indexOfObjectIdenticalTo:annotation]];
             [rightButton addTarget:self
                             action:@selector(showDetails:)
                   forControlEvents:UIControlEventTouchUpInside];
@@ -528,7 +529,27 @@ enum
 	// Fetch all events that match the predicate.
 	NSArray *events = [self.eventStore eventsMatchingPredicate:predicate];
     
-	return events;
+	NSMutableArray *eventsWithGeo=[[NSMutableArray alloc] initWithCapacity:10];
+
+    
+    EKEvent *event  = [[EKEvent eventWithEventStore:eventStore] retain];
+    for (event in events){
+        NSString *notes=event.notes;
+        if (notes){
+            
+            NSRange textRangeLat;
+            textRangeLat =[notes rangeOfString:@"lat"];
+            
+            NSRange textRangeLon;
+            textRangeLon =[notes rangeOfString:@" lon"];
+            
+            if(textRangeLat.location != NSNotFound)
+            { 
+              [eventsWithGeo addObject:event];
+            }
+        }
+    }
+    return eventsWithGeo;
 }
 
 

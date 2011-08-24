@@ -64,7 +64,6 @@
     EKEvent *tempEvent;
 	NSMutableArray *eventsList;
     NSMutableArray *pinList;
-  
 }
 @property (nonatomic, retain) NSString *placeDescription;
 @property (nonatomic, retain) IBOutlet MKMapView *mapView;
@@ -81,9 +80,9 @@
 + (CGFloat)annotationPadding;
 + (CGFloat)calloutHeight;
 
-- (IBAction)cityAction:(id)sender;
-- (IBAction)bridgeAction:(id)sender;
-- (IBAction)allAction:(id)sender;
+- (IBAction)walkAction:(id)sender;
+- (IBAction)carAction:(id)sender;
+- (IBAction)detailsAction:(id)sender;
 - (IBAction)reverseGeocodeCurrentLocation;
 - (IBAction)reverseGeocodeByLocation:(CLLocationCoordinate2D) coordinate;
 - (NSArray *) fetchEventsForToday;
