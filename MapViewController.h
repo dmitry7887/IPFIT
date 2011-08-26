@@ -64,6 +64,7 @@
     EKEvent *tempEvent;
 	NSMutableArray *eventsList;
     NSMutableArray *pinList;
+    BOOL EditEvent;
 }
 @property (nonatomic, retain) NSString *placeDescription;
 @property (nonatomic, retain) IBOutlet MKMapView *mapView;

@@ -96,7 +96,6 @@ enum
 {
     NSString *errorMessage = [error localizedDescription];
     NSLog(@"Cannot obtain address. %@s",errorMessage);
-    [pinList removeLastObject];
 }
 
 - (void)reverseGeocoder:(MKReverseGeocoder *)geocoder didFindPlacemark:(MKPlacemark *)placemark
@@ -107,7 +106,8 @@ enum
    
     placeDescription=[placemark title];
     annot.subtitle=placeDescription; 
-    tempEvent.location=placeDescription;
+    
+    tempEvent.notes=placeDescription;
     EKEventEditViewController *addController = [[EKEventEditViewController alloc] initWithNibName:nil bundle:nil];
     
     
@@ -121,10 +121,6 @@ enum
     addController.editViewDelegate = self;
     
     [addController release];
-    NSError *err;
-    [eventStore saveEvent:tempEvent span:EKSpanThisEvent error:&err];
-    [tempEvent release];
-    [annot release];
     
     //[self presentModalViewController:placemarkViewController animated:YES];
 }
@@ -140,6 +136,23 @@ enum
 
     [self.mapView setRegion:newRegion animated:YES];
 }
+
+// Listen to change in the userLocation
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context 
+{       
+    MKCoordinateRegion region;
+    region.center = self.mapView.userLocation.coordinate;  
+    
+    MKCoordinateSpan span; 
+    span.latitudeDelta  = 0.05; // Change these values to change the zoom
+    span.longitudeDelta = 0.05; 
+    region.span = span;
+    [self.mapView.userLocation removeObserver:self forKeyPath:@"location"];
+ 
+    [self.mapView setRegion:region animated:YES];
+    
+}
+
 
 - (void)viewDidAppear:(BOOL)animated
 {
@@ -164,27 +177,23 @@ enum
     [self.mapView convertPoint:touchPoint toCoordinateFromView:self.mapView];
     
     
-    annot = [[[MKPointAnnotation alloc] init] retain];
+    annot = [[MKPointAnnotation alloc] init];
     annot.coordinate = touchMapCoordinate;
     annot.title=@"Do";
-    [pinList addObject:annot];
     
     [self reverseGeocodeByLocation:touchMapCoordinate]; 
-    [self.mapView addAnnotation:annot];
-    [annot autorelease];    
      
     tempEvent  = [[EKEvent eventWithEventStore:eventStore] retain];
-    tempEvent.notes=[[NSString stringWithFormat:@"lat=%f",touchMapCoordinate.latitude] stringByAppendingString:[NSString stringWithFormat:@" lon=%f",touchMapCoordinate.longitude]];
+    tempEvent.location=[[NSString stringWithFormat:@"lat=%f",touchMapCoordinate.latitude] stringByAppendingString:[NSString stringWithFormat:@" lon=%f",touchMapCoordinate.longitude]];
      
     tempEvent.startDate = [NSDate date];
     tempEvent.endDate   = [NSDate dateWithTimeInterval:600 sinceDate:tempEvent.startDate];
-    [eventsList addObject:tempEvent];
 }
 
 - (void)viewDidLoad
 {
-    self.mapView.mapType = MKMapTypeStandard;   // also MKMapTypeSatellite or MKMapTypeHybrid
-
+    mapView.mapType = MKMapTypeStandard;   // also MKMapTypeSatellite or MKMapTypeHybrid
+    EditEvent=NO;
     // create a custom navigation bar button and set it to always says "Back"
 	UIBarButtonItem *temporaryBarButtonItem = [[UIBarButtonItem alloc] init];
 	temporaryBarButtonItem.title = @"Back";
@@ -193,51 +202,52 @@ enum
     
     
     [self gotoLocation];    // finally goto San Francisco
+    [self.mapView.userLocation addObserver:self forKeyPath:@"location" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:nil];
     UILongPressGestureRecognizer *lpgr = [[UILongPressGestureRecognizer alloc] 
                                           initWithTarget:self action:@selector(handleLongPress:)];
     lpgr.minimumPressDuration = 1.0; //user needs to press for 1 seconds
-    [self.mapView addGestureRecognizer:lpgr];
+    [mapView addGestureRecognizer:lpgr];
     [lpgr release];
     mapView.showsUserLocation = YES;
-    self.pinList=[[NSMutableArray alloc] initWithCapacity:10];
+    pinList=[[NSMutableArray alloc] initWithCapacity:10];
     
   
     
     
     // Initialize an event store object with the init method. Initilize the array for events.
-	self.eventStore = [[[EKEventStore alloc] init] autorelease];
+	eventStore = [[EKEventStore alloc] init];
     
-	self.eventsList = [[[NSMutableArray alloc] initWithArray:0] autorelease];
+	eventsList = [[NSMutableArray alloc] initWithArray:0];
 
 	// Get the default calendar from store.
-	self.defaultCalendar = [self.eventStore defaultCalendarForNewEvents];
+	defaultCalendar = [[self.eventStore defaultCalendarForNewEvents] retain];
 
 	// Fetch today's event on selected calendar and put them into the eventsList array
-	[self.eventsList addObjectsFromArray:[self fetchEventsForToday]];
+	[eventsList addObjectsFromArray:[self fetchEventsForToday]];
     
         
-    EKEvent *event  = [[EKEvent eventWithEventStore:eventStore] retain];
+    EKEvent *event;
     CLLocationCoordinate2D location; 
     for (event in eventsList){
-        NSString *notes=event.notes;
-        if (notes){
+        NSString *locate=event.location;
+        if (locate){
  
             NSRange textRangeLat;
-            textRangeLat =[notes rangeOfString:@"lat"];
+            textRangeLat =[locate rangeOfString:@"lat"];
             
             NSRange textRangeLon;
-            textRangeLon =[notes rangeOfString:@" lon"];
+            textRangeLon =[locate rangeOfString:@" lon"];
             
             if(textRangeLat.location != NSNotFound)
             { 
                 textRangeLat.location=textRangeLat.location+4;
                 textRangeLat.length=textRangeLon.location-textRangeLat.location;
                 textRangeLon.location=textRangeLon.location+5;
-                textRangeLon.length=notes.length-textRangeLon.location;
+                textRangeLon.length=locate.length-textRangeLon.location;
                 
-                NSString *lon=[notes substringWithRange:textRangeLon];
-                NSString *lat=[notes substringWithRange:textRangeLat];
-                annot = [[[MKPointAnnotation alloc] init] retain];
+                NSString *lon=[locate substringWithRange:textRangeLon];
+                NSString *lat=[locate substringWithRange:textRangeLat];
+                annot = [[MKPointAnnotation alloc] init];
                 location.latitude=[lat doubleValue];
                 location.longitude=[lon doubleValue];
                 
@@ -246,9 +256,8 @@ enum
                 annot.subtitle=event.location;
                 [pinList addObject:annot];
                 
-                [self.mapView addAnnotation:annot];
+                [mapView addAnnotation:annot];
                 
-                [self.pinList addObject:annot];
                 //Does contain the substring
             }
         }
@@ -272,7 +281,16 @@ enum
     [detailViewController release];
     [eventViewController release];
     [mapAnnotations release];
+    for (annot in pinList){
+        [annot release];
+    }
+    [pinList release];
+    for (tempEvent in eventsList){
+        [tempEvent release];
+    }
     
+    [eventsList release];
+    [eventStore release];
     [super dealloc];
 }
 
@@ -310,23 +328,38 @@ enum
 - (void)showDetails:(id)sender
 {
 	UIButton* button = sender;
-    
+
 	NSInteger index = button.tag;
     // the detail view does not want a toolbar so hide it
     [self.navigationController setToolbarHidden:YES animated:NO];
     
-    // Upon selecting an event, create an EKEventViewController to display the event.
-	self.eventViewController = [[EKEventViewController alloc] initWithNibName:nil bundle:nil];			
-	if ([self.eventsList count]>index){
-        eventViewController.event = [self.eventsList objectAtIndex:index];
+//    // Upon selecting an event, create an EKEventViewController to display the event.
+//	eventViewController = [[[EKEventViewController alloc] initWithNibName:nil bundle:nil] retain];			
+	if ([eventsList count]>index){
+        EKEventEditViewController *addController = [[EKEventEditViewController alloc] initWithNibName:nil bundle:nil];
         
-        // Allow event editing.
-        eventViewController.allowsEditing = YES;
+        EditEvent=YES; 
+        // set the addController's event store to the current event store.
+        addController.eventStore = eventStore;
+        tempEvent=[self.eventsList objectAtIndex:index];
         
-        //	Push detailViewController onto the navigation controller stack
-        //	If the underlying event gets deleted, detailViewController will remove itself from
-        //	the stack and clear its event property.
-        [self.navigationController pushViewController:eventViewController animated:YES];   
+        addController.event=tempEvent;
+        // present EventsAddViewController as a modal view controller
+        [self presentModalViewController:addController animated:YES];
+        
+        addController.editViewDelegate = self;
+        
+        [addController release];
+      
+//        eventViewController.event = [self.eventsList objectAtIndex:index];
+//       
+//        // Allow event editing.
+//        eventViewController.allowsEditing = YES;
+//        
+//        //	Push detailViewController onto the navigation controller stack
+//        //	If the underlying event gets deleted, detailViewController will remove itself from
+//        //	the stack and clear its event property.
+//        [self.navigationController pushViewController:eventViewController animated:YES];   
     
     }
 }
@@ -358,7 +391,7 @@ enum
             // note: you can assign a specific call out accessory view, or as MKMapViewDelegate you can implement:
             //  - (void)mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view calloutAccessoryControlTapped:(UIControl *)control;
             //
-            UIButton* rightButton = [[UIButton buttonWithType:UIButtonTypeDetailDisclosure] retain];
+            UIButton* rightButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
 			[rightButton setTag:[pinList indexOfObjectIdenticalTo:annotation]];
             [rightButton addTarget:self
                             action:@selector(showDetails:)
@@ -471,7 +504,6 @@ enum
 	
 	switch (action) {
 		case EKEventEditViewActionCanceled:
-			// Edit action canceled, do nothing. 
 			break;
 			
 		case EKEventEditViewActionSaved:
@@ -480,10 +512,30 @@ enum
 			// If the new event is being added to the default calendar, then update its 
 			// eventsList.
 			if (self.defaultCalendar ==  thisEvent.calendar) {
-				[self.eventsList addObject:thisEvent];
+				
+                if (!EditEvent){ 
+                    [eventsList addObject:thisEvent];
+                    annot.title=thisEvent.title;
+                    thisEvent.location=[[NSString stringWithFormat:@"lat=%f",annot.coordinate.latitude] stringByAppendingString:[NSString stringWithFormat:@" lon=%f",annot.coordinate.longitude]];
+                    [pinList addObject:annot];
+                    [mapView addAnnotation:annot];
+
+                }
+                else{
+                    NSUInteger index=[eventsList indexOfObjectIdenticalTo:tempEvent];
+                    [eventsList removeObject:tempEvent];
+                    annot=[pinList objectAtIndex:index];
+                    [pinList removeObject:annot];
+                    annot.title=thisEvent.title;
+                    [pinList addObject:annot];
+                    thisEvent.location=[[NSString stringWithFormat:@"lat=%f",annot.coordinate.latitude] stringByAppendingString:[NSString stringWithFormat:@" lon=%f",annot.coordinate.longitude]];
+                    [eventsList addObject:thisEvent];  
+                }
+
 			}
 			[controller.eventStore saveEvent:controller.event span:EKSpanThisEvent error:&error];
 			//[self.tableView reloadData];
+
 			break;
 			
 		case EKEventEditViewActionDeleted:
@@ -491,8 +543,15 @@ enum
 			// and reload table view.
 			// If deleting an event from the currenly default calendar, then update its 
 			// eventsList.
-			if (self.defaultCalendar ==  thisEvent.calendar) {
-				[self.eventsList removeObject:thisEvent];
+			if (defaultCalendar ==  thisEvent.calendar && tempEvent!=nil) {
+                NSUInteger index=[eventsList indexOfObjectIdenticalTo:tempEvent];
+                annot=[pinList objectAtIndex:index];
+                
+                [mapView removeAnnotation:annot];	
+                
+                tempEvent=nil;
+                
+                
 			}
 			[controller.eventStore removeEvent:thisEvent span:EKSpanThisEvent error:&error];
 			//[self.tableView reloadData];
@@ -503,7 +562,7 @@ enum
 	}
 	// Dismiss the modal view controller
 	[controller dismissModalViewControllerAnimated:YES];
-	
+    EditEvent=NO; 	
 }
 
 
@@ -529,21 +588,21 @@ enum
 	// Fetch all events that match the predicate.
 	NSArray *events = [self.eventStore eventsMatchingPredicate:predicate];
     
-	NSMutableArray *eventsWithGeo=[[NSMutableArray alloc] initWithCapacity:10];
+	NSMutableArray *eventsWithGeo=[[[NSMutableArray alloc] initWithCapacity:10] autorelease];
 
     
-    EKEvent *event  = [[EKEvent eventWithEventStore:eventStore] retain];
+    EKEvent *event;
     for (event in events){
-        NSString *notes=event.notes;
-        if (notes){
+        NSString *locate=event.location;
+        if (locate && event.title){
             
             NSRange textRangeLat;
-            textRangeLat =[notes rangeOfString:@"lat"];
+            textRangeLat =[locate rangeOfString:@"lat"];
             
             NSRange textRangeLon;
-            textRangeLon =[notes rangeOfString:@" lon"];
+            textRangeLon =[locate rangeOfString:@" lon"];
             
-            if(textRangeLat.location != NSNotFound)
+            if(textRangeLat.location != NSNotFound && textRangeLon.location != NSNotFound)
             { 
               [eventsWithGeo addObject:event];
             }

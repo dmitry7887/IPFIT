@@ -54,7 +54,7 @@
 @interface RootViewController : UITableViewController <UINavigationBarDelegate, UITableViewDelegate, 
 EKEventEditViewDelegate, UINavigationControllerDelegate, UIActionSheetDelegate> {
 
-	EKEventViewController *detailViewController;
+	EKEventViewController *tableEventViewController;
 	EKEventStore *eventStore;
 	EKCalendar *defaultCalendar;
 	NSMutableArray *eventsList;
@@ -63,7 +63,7 @@ EKEventEditViewDelegate, UINavigationControllerDelegate, UIActionSheetDelegate> 
 @property (nonatomic, retain) EKEventStore *eventStore;
 @property (nonatomic, retain) EKCalendar *defaultCalendar;
 @property (nonatomic, retain) NSMutableArray *eventsList;
-@property (nonatomic, retain) EKEventViewController *detailViewController;
+@property (nonatomic, retain) EKEventViewController *tableEventViewController;
 
 - (NSArray *) fetchEventsForToday;
 - (IBAction) addEvent:(id)sender;

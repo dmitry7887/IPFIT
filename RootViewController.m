@@ -51,7 +51,7 @@
 
 @implementation RootViewController
 
-@synthesize eventsList, eventStore, defaultCalendar, detailViewController;
+@synthesize eventsList, eventStore, defaultCalendar, tableEventViewController;
 
 
 #pragma mark -
@@ -61,7 +61,7 @@
 	[eventStore release];
 	[eventsList release];
 	[defaultCalendar release];
-	[detailViewController release];
+	[tableEventViewController release];
 
 	[super dealloc];
 }
@@ -74,12 +74,12 @@
 	self.title = @"Events List";
 	
 	// Initialize an event store object with the init method. Initilize the array for events.
-	self.eventStore = [[EKEventStore alloc] init];
+	eventStore = [[EKEventStore alloc] init];
 
-	self.eventsList = [[NSMutableArray alloc] initWithArray:0];
+	eventsList = [[[NSMutableArray alloc] initWithArray:0] autorelease];
 	
 	// Get the default calendar from store.
-	self.defaultCalendar = [self.eventStore defaultCalendarForNewEvents];
+	defaultCalendar = [eventStore defaultCalendarForNewEvents];
 	
 	//	Create an Add button 
 	UIBarButtonItem *addButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:
@@ -173,16 +173,16 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {	
 	// Upon selecting an event, create an EKEventViewController to display the event.
-	self.detailViewController = [[EKEventViewController alloc] initWithNibName:nil bundle:nil];			
-	detailViewController.event = [self.eventsList objectAtIndex:indexPath.row];
+	self.tableEventViewController = [[[EKEventViewController alloc] initWithNibName:nil bundle:nil] autorelease];			
+	tableEventViewController.event = [self.eventsList objectAtIndex:indexPath.row];
 	
 	// Allow event editing.
-	detailViewController.allowsEditing = YES;
+	tableEventViewController.allowsEditing = YES;
 	
 	//	Push detailViewController onto the navigation controller stack
 	//	If the underlying event gets deleted, detailViewController will remove itself from
 	//	the stack and clear its event property.
-	[self.navigationController pushViewController:detailViewController animated:YES];
+    [self.navigationController presentModalViewController:tableEventViewController animated:YES];
 		
 }
 
@@ -195,8 +195,8 @@
 	// if we are navigating back to the rootViewController, and the detailViewController's event
 	// has been deleted -  will title being NULL, then remove the events from the eventsList
 	// and reload the table view. This takes care of reloading the table view after adding an event too.
-	if (viewController == self && self.detailViewController.event.title == NULL) {
-		[self.eventsList removeObject:self.detailViewController.event];
+	if (viewController == self && self.tableEventViewController.event.title == NULL) {
+		[self.eventsList removeObject:self.tableEventViewController.event];
 		[self.tableView reloadData];
 	}
 }

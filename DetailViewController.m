@@ -55,7 +55,7 @@
 {
     [super viewDidLoad];
     // When add button is pushed, create an EKEventEditViewController to display the event.
-	RootViewController *addController = [[RootViewController alloc] initWithNibName:@"RootViewController" bundle:nil];
+	RootViewController *addController = [[[RootViewController alloc] initWithNibName:@"RootViewController" bundle:nil] autorelease];
 	
 	// present EventsAddViewController as a modal view controller
 	[self.view addSubview:[addController tableView]];
