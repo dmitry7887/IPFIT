@@ -85,14 +85,25 @@
 {
     NSString *errorMessage = [error localizedDescription];
     NSLog(@"Cannot obtain address. %@s",errorMessage);
+    EKEventEditViewController *addController = [[EKEventEditViewController alloc] initWithNibName:nil bundle:nil];
+    
+    
+    // set the addController's event store to the current event store.
+    addController.eventStore = eventStore;
+    addController.event=tempEvent;
+    
+    // present EventsAddViewController as a modal view controller
+    [self presentModalViewController:addController animated:YES];
+    
+    addController.editViewDelegate = self;
+    
+    [addController release];
+
 }
 
 - (void)reverseGeocoder:(MKReverseGeocoder *)geocoder didFindPlacemark:(MKPlacemark *)placemark
 {
-    //PlacemarkViewController *placemarkViewController =
-    //[[PlacemarkViewController alloc] initWithNibName:@"PlacemarkViewController" bundle:nil];
-    //placemarkViewController.placemark = placemark;
-   
+  
     placeDescription=[placemark title];
     annot.subtitle=placeDescription; 
     
@@ -111,7 +122,6 @@
     
     [addController release];
     
-    //[self presentModalViewController:placemarkViewController animated:YES];
 }
 
 - (void)gotoLocation
