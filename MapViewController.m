@@ -253,7 +253,7 @@ enum
                 
                 annot.coordinate=location;
                 annot.title=event.title;
-                annot.subtitle=event.location;
+                annot.subtitle=event.notes;
                 [pinList addObject:annot];
                 
                 [mapView addAnnotation:annot];
@@ -523,13 +523,14 @@ enum
                 }
                 else{
                     NSUInteger index=[eventsList indexOfObjectIdenticalTo:tempEvent];
-                    [eventsList removeObject:tempEvent];
                     annot=[pinList objectAtIndex:index];
-                    [pinList removeObject:annot];
-                    annot.title=thisEvent.title;
+                    [mapView removeAnnotation:annot];
                     [pinList addObject:annot];
+                    [mapView addAnnotation:annot];
+                    annot.title=thisEvent.title;
                     thisEvent.location=[[NSString stringWithFormat:@"lat=%f",annot.coordinate.latitude] stringByAppendingString:[NSString stringWithFormat:@" lon=%f",annot.coordinate.longitude]];
                     [eventsList addObject:thisEvent];  
+                    
                 }
 
 			}
