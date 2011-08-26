@@ -46,12 +46,11 @@
 */
 
 #import "MapViewController.h"
-#import "DetailViewController.h"
-#import <EventKit/EventKit.h>
+
 
 @implementation MapViewController
 
-@synthesize mapView, detailViewController, reverseGeocoder,pinList, eventsList, eventStore, defaultCalendar, placeDescription, tempEvent;
+@synthesize mapView, reverseGeocoder,pinList, eventsList, eventStore, defaultCalendar, placeDescription, tempEvent;
 
 
 #pragma mark -
@@ -258,14 +257,12 @@
 
 - (void)viewDidUnload
 {
-    self.detailViewController = nil;
-    self.mapView = nil;
+      self.mapView = nil;
 }
 
 - (void)dealloc 
 {
     [mapView release];
-    [detailViewController release];
     for (annot in pinList){
         [annot release];
     }
@@ -302,8 +299,6 @@
 
 - (IBAction)detailsAction:(id)sender
 {
-   
-    [self.navigationController pushViewController:self.detailViewController animated:YES];   
 
 }
 

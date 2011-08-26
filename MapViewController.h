@@ -47,14 +47,12 @@
 
 #import <UIKit/UIKit.h>
 #import <MapKit/MapKit.h>
+#import <EventKit/EventKit.h>
 #import <EventKitUI/EventKitUI.h>
-
-@class DetailViewController;
 
 @interface MapViewController : UIViewController <MKMapViewDelegate, MKReverseGeocoderDelegate, EKEventEditViewDelegate>
 {
     MKMapView *mapView;
-    DetailViewController *detailViewController;
     MKReverseGeocoder *reverseGeocoder;
     MKPointAnnotation *annot;
     NSString *placeDescription;
@@ -73,7 +71,7 @@
 @property (nonatomic, retain) EKCalendar *defaultCalendar;
 @property (nonatomic, retain) NSMutableArray *eventsList;
 @property (nonatomic, retain) NSMutableArray *pinList;
-@property (nonatomic, retain) DetailViewController *detailViewController;
+
 
 + (CGFloat)annotationPadding;
 + (CGFloat)calloutHeight;
