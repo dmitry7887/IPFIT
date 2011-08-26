@@ -55,11 +55,10 @@
 {
     MKMapView *mapView;
     DetailViewController *detailViewController;
-    NSMutableArray *mapAnnotations; MKReverseGeocoder *reverseGeocoder;
+    MKReverseGeocoder *reverseGeocoder;
     MKPointAnnotation *annot;
     NSString *placeDescription;
-    EKEventViewController *eventViewController;
-	EKEventStore *eventStore;
+   	EKEventStore *eventStore;
 	EKCalendar *defaultCalendar;
     EKEvent *tempEvent;
 	NSMutableArray *eventsList;
@@ -68,14 +67,12 @@
 }
 @property (nonatomic, retain) NSString *placeDescription;
 @property (nonatomic, retain) IBOutlet MKMapView *mapView;
-@property (nonatomic, retain) NSMutableArray *mapAnnotations;
 @property (nonatomic, retain) MKReverseGeocoder *reverseGeocoder;
 @property (nonatomic, retain) EKEvent *tempEvent;
 @property (nonatomic, retain) EKEventStore *eventStore;
 @property (nonatomic, retain) EKCalendar *defaultCalendar;
 @property (nonatomic, retain) NSMutableArray *eventsList;
 @property (nonatomic, retain) NSMutableArray *pinList;
-@property (nonatomic, retain) EKEventViewController *eventViewController;
 @property (nonatomic, retain) DetailViewController *detailViewController;
 
 + (CGFloat)annotationPadding;

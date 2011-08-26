@@ -47,21 +47,11 @@
 
 #import "MapViewController.h"
 #import "DetailViewController.h"
-#import "SFAnnotation.h"
-#import "BridgeAnnotation.h"
-#import "EventMKAnnotation.h"
 #import <EventKit/EventKit.h>
-enum
-{
-    kCityAnnotationIndex = 0,
-    kBridgeAnnotationIndex,
-    kMyAnnotationIndex,
-    
-};
 
 @implementation MapViewController
 
-@synthesize mapView, detailViewController,eventViewController, mapAnnotations, reverseGeocoder,pinList, eventsList, eventStore, defaultCalendar, placeDescription, tempEvent;
+@synthesize mapView, detailViewController, reverseGeocoder,pinList, eventsList, eventStore, defaultCalendar, placeDescription, tempEvent;
 
 
 #pragma mark -
@@ -268,10 +258,7 @@ enum
 
 - (void)viewDidUnload
 {
-    self.mapAnnotations = nil;
     self.detailViewController = nil;
-    self.eventViewController = nil;
-
     self.mapView = nil;
 }
 
@@ -279,8 +266,6 @@ enum
 {
     [mapView release];
     [detailViewController release];
-    [eventViewController release];
-    [mapAnnotations release];
     for (annot in pinList){
         [annot release];
     }
@@ -405,91 +390,6 @@ enum
         }
         return pinView;
     }
-        
-    
-    // handle our two custom annotations
-    //
-    if ([annotation isKindOfClass:[BridgeAnnotation class]]) // for Golden Gate Bridge
-    {
-        // try to dequeue an existing pin view first
-        static NSString* BridgeAnnotationIdentifier = @"bridgeAnnotationIdentifier";
-        MKPinAnnotationView* pinView = (MKPinAnnotationView *)
-                                        [mapView dequeueReusableAnnotationViewWithIdentifier:BridgeAnnotationIdentifier];
-        if (!pinView)
-        {
-            // if an existing pin view was not available, create one
-            MKPinAnnotationView* customPinView = [[[MKPinAnnotationView alloc]
-                                             initWithAnnotation:annotation reuseIdentifier:BridgeAnnotationIdentifier] autorelease];
-            customPinView.pinColor = MKPinAnnotationColorPurple;
-            customPinView.animatesDrop = YES;
-            customPinView.canShowCallout = YES;
-            
-            // add a detail disclosure button to the callout which will open a new view controller page
-            //
-            // note: you can assign a specific call out accessory view, or as MKMapViewDelegate you can implement:
-            //  - (void)mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view calloutAccessoryControlTapped:(UIControl *)control;
-            //
-            UIButton* rightButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-            [rightButton addTarget:self
-                            action:@selector(showDetails:)
-                  forControlEvents:UIControlEventTouchUpInside];
-            customPinView.rightCalloutAccessoryView = rightButton;
-
-            return customPinView;
-        }
-        else
-        {
-            pinView.annotation = annotation;
-        }
-        return pinView;
-    }
-    else if ([annotation isKindOfClass:[SFAnnotation class]])   // for City of San Francisco
-    {
-        static NSString* SFAnnotationIdentifier = @"SFAnnotationIdentifier";
-        MKPinAnnotationView* pinView =
-            (MKPinAnnotationView *)[mapView dequeueReusableAnnotationViewWithIdentifier:SFAnnotationIdentifier];
-        if (!pinView)
-        {
-            MKAnnotationView *annotationView = [[[MKAnnotationView alloc] initWithAnnotation:annotation
-                                                                             reuseIdentifier:SFAnnotationIdentifier] autorelease];
-            annotationView.canShowCallout = YES;
-        
-            UIImage *flagImage = [UIImage imageNamed:@"flag.png"];
-            
-            CGRect resizeRect;
-            
-            resizeRect.size = flagImage.size;
-            CGSize maxSize = CGRectInset(self.view.bounds,
-                                         [MapViewController annotationPadding],
-                                         [MapViewController annotationPadding]).size;
-            maxSize.height -= self.navigationController.navigationBar.frame.size.height + [MapViewController calloutHeight];
-            if (resizeRect.size.width > maxSize.width)
-                resizeRect.size = CGSizeMake(maxSize.width, resizeRect.size.height / resizeRect.size.width * maxSize.width);
-            if (resizeRect.size.height > maxSize.height)
-                resizeRect.size = CGSizeMake(resizeRect.size.width / resizeRect.size.height * maxSize.height, maxSize.height);
-            
-            resizeRect.origin = (CGPoint){0.0f, 0.0f};
-            UIGraphicsBeginImageContext(resizeRect.size);
-            [flagImage drawInRect:resizeRect];
-            UIImage *resizedImage = UIGraphicsGetImageFromCurrentImageContext();
-            UIGraphicsEndImageContext();
-            
-            annotationView.image = resizedImage;
-            annotationView.opaque = NO;
-             
-            UIImageView *sfIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"SFIcon.png"]];
-            annotationView.leftCalloutAccessoryView = sfIconView;
-            [sfIconView release];
-            
-            return annotationView;
-        }
-        else
-        {
-            pinView.annotation = annotation;
-        }
-        return pinView;
-    }
-    
     return nil;
 }
 #pragma mark -
