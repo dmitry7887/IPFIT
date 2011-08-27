@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		18B2D33E13FE37AA00B585E3 /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18B2D33C13FE37AA00B585E3 /* EventKit.framework */; };
 		18B2D33F13FE37AA00B585E3 /* EventKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18B2D33D13FE37AA00B585E3 /* EventKitUI.framework */; };
-		18BD611E13FD227100671CE9 /* PlacemarkViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 18BD611C13FD227100671CE9 /* PlacemarkViewController.xib */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
@@ -37,7 +36,6 @@
 /* Begin PBXFileReference section */
 		18B2D33C13FE37AA00B585E3 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
 		18B2D33D13FE37AA00B585E3 /* EventKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKitUI.framework; path = System/Library/Frameworks/EventKitUI.framework; sourceTree = SDKROOT; };
-		18BD611D13FD227100671CE9 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/PlacemarkViewController.xib; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D6058910D05DD3D006BFB54 /* GeoDo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GeoDo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -121,7 +119,6 @@
 				CB6C7CA411D53FDA00AC7FA8 /* images */,
 				5321F1900F7AE5BE00EC9E3A /* Info.plist */,
 				5321F18D0F7AE5BA00EC9E3A /* MainWindow.xib */,
-				18BD611C13FD227100671CE9 /* PlacemarkViewController.xib */,
 				533D37F210B32D500057E53B /* MapViewController.xib */,
 			);
 			name = Resources;
@@ -239,7 +236,6 @@
 				CB6C7CBB11D53FDA00AC7FA8 /* Location.png in Resources */,
 				CB6C7CBC11D53FDA00AC7FA8 /* SFIcon.png in Resources */,
 				CB6C7CBE11D5400200AC7FA8 /* iTunesArtwork in Resources */,
-				18BD611E13FD227100671CE9 /* PlacemarkViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -259,14 +255,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		18BD611C13FD227100671CE9 /* PlacemarkViewController.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				18BD611D13FD227100671CE9 /* en */,
-			);
-			name = PlacemarkViewController.xib;
-			sourceTree = "<group>";
-		};
 		5321F18D0F7AE5BA00EC9E3A /* MainWindow.xib */ = {
 			isa = PBXVariantGroup;
 			children = (

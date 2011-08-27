@@ -14,7 +14,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
-               BuildableName = "MapCallouts.app"
+               BuildableName = "GeoDo.app"
                BlueprintName = "GeoDo"
                ReferencedContainer = "container:GeoDo.xcodeproj">
             </BuildableReference>
@@ -40,7 +40,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
-            BuildableName = "MapCallouts.app"
+            BuildableName = "GeoDo.app"
             BlueprintName = "GeoDo"
             ReferencedContainer = "container:GeoDo.xcodeproj">
          </BuildableReference>
@@ -58,7 +58,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
-            BuildableName = "MapCallouts.app"
+            BuildableName = "GeoDo.app"
             BlueprintName = "GeoDo"
             ReferencedContainer = "container:GeoDo.xcodeproj">
          </BuildableReference>
